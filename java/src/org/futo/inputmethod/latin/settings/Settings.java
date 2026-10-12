@@ -143,6 +143,8 @@ public final class Settings implements SharedPreferences.OnSharedPreferenceChang
     public static final int BACKSPACE_MODE_WORDS = 1; // Long-press backspace and swipe backspace removes entire words
     public static final int BACKSPACE_MODE_OFF = 2;
 
+    public static final String PREF_SWIPE_DOWN_DELETE_WORD = "pref_swipe_down_delete_word";
+
     public static final String PREF_ALT_SPACES_MODE = "pref_alt_spaces";
     public static final int SPACES_MODE_NONE = -1; // No phantom spaces, no antiphantom
     public static final int SPACES_MODE_LEGACY = 0; // Only use phantom spaces

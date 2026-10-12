@@ -432,6 +432,8 @@
     <string name="morekey_settings_backspace_swipe_to_delete_off">Off</string>
     <string name="morekey_settings_backspace_swipe_to_delete_characters">Characters</string>
     <string name="morekey_settings_backspace_swipe_to_delete_words">Words</string>
+    <string name="morekey_settings_swipe_down_delete_word">Swipe down to delete word</string>
+    <string name="morekey_settings_swipe_down_delete_word_subtitle">Quickly swipe down on any letter key to delete the last word. Requires swipe typing to be disabled</string>
     <string name="morekey_settings_spacebar_title">Spacebar</string>
     <string name="morekey_settings_spacebar_swipe_shortcut">Swipe</string>
     <string name="morekey_settings_spacebar_swipe_shortcut_off">Off</string>

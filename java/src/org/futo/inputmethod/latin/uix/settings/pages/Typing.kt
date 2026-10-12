@@ -590,6 +590,13 @@ val LongPressMenu = UserSettingsMenu(
             )
         },
 
+        userSettingToggleSharedPrefs(
+            title = R.string.morekey_settings_swipe_down_delete_word,
+            subtitle = R.string.morekey_settings_swipe_down_delete_word_subtitle,
+            key = Settings.PREF_SWIPE_DOWN_DELETE_WORD,
+            default = { false },
+        ),
+
 
         userSettingDecorationOnly {
             ScreenTitle(stringResource(R.string.morekey_settings_spacebar_title))

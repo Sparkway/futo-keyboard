@@ -64,6 +64,7 @@ class ActionInputTransactionIME(val helper: IMEHelper) : IMEInterface, ActionInp
     override fun onMovePointer(steps: Int, stepOverWords: Boolean, select: Boolean?) {}
     override fun onMoveDeletePointer(steps: Int) {}
     override fun onUpWithDeletePointerActive() {}
+    override fun onSwipeDeleteWord() {}
     override fun onUpWithPointerActive() {}
     override fun onSwipeLanguage(direction: Int) {}
     override fun onMovingCursorLockEvent(canMoveCursor: Boolean) {}

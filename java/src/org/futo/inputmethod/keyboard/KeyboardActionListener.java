@@ -104,6 +104,8 @@ public interface KeyboardActionListener {
     public void onMovePointer(int steps);
     public void onMoveDeletePointer(int steps);
     public void onUpWithDeletePointerActive();
+    /** Deletes the word before the cursor (swipe-down gesture on a letter key). */
+    public void onSwipeDeleteWord();
     public void onUpWithPointerActive();
     public void onMovingCursorLockEvent(boolean canMoveCursor);
 
@@ -141,6 +143,8 @@ public interface KeyboardActionListener {
         public void onMoveDeletePointer(int steps) {}
         @Override
         public void onUpWithDeletePointerActive() {}
+        @Override
+        public void onSwipeDeleteWord() {}
         @Override
         public void onUpWithPointerActive() {}
         @Override

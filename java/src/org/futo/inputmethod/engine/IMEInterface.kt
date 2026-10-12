@@ -84,6 +84,7 @@ interface IMEInterface {
     fun onMovePointer(steps: Int, stepOverWords: Boolean, select: Boolean?)
     fun onMoveDeletePointer(steps: Int)
     fun onUpWithDeletePointerActive()
+    fun onSwipeDeleteWord()
     fun onUpWithPointerActive()
     fun onSwipeLanguage(direction: Int)
     fun onMovingCursorLockEvent(canMoveCursor: Boolean)

@@ -159,6 +159,12 @@ public final class PointerTracker implements PointerTrackerQueue.Element,
     private boolean mProgressReported = false;
     private boolean mSpacebarLongPressed = false;
 
+    // Swipe-down-to-delete-word gesture. The key the pointer started on is kept because
+    // mCurrentKey may change while the finger travels down.
+    private static final long SWIPE_DELETE_MAX_DURATION_MS = 300;
+    @Nullable
+    private Key mSwipeDeleteStartKey;
+
     // true if keyboard layout has been changed.
     private boolean mKeyboardLayoutHasBeenChanged;
 
@@ -720,6 +726,7 @@ public final class PointerTracker implements PointerTrackerQueue.Element,
     }
 
     private void onDownEventInternal(final int x, final int y, final long eventTime) {
+        mSwipeDeleteStartKey = null;
         Key key = onDownKey(x, y, eventTime);
         // Key selection by dragging finger is allowed when 1) key selection by dragging finger is
         // enabled by configuration, 2) this pointer starts dragging from modifier key, or 3) this
@@ -766,7 +773,42 @@ public final class PointerTracker implements PointerTrackerQueue.Element,
             mIsFlickingKey = !mIsSlidingCursor && key.getHasFlick();
             mFlickDirection = key.flickDirection(0, 0);
             mCurrentKey = key;
+
+            if (Settings.getInstance().getCurrent().mSwipeDownDeletesWord
+                    && !mIsSlidingCursor && !mIsFlickingKey
+                    && !key.isModifier() && !key.isRepeatable()) {
+                mSwipeDeleteStartKey = key;
+            }
         }
+    }
+
+    private int getSwipeDeleteMinDistance() {
+        return mKeyboard != null ? mKeyboard.mMostCommonKeyHeight : sPointerBigStep;
+    }
+
+    private int getSwipeDeleteSlop() {
+        return mKeyboard != null ? mKeyboard.mMostCommonKeyWidth / 4 : sPointerStep;
+    }
+
+    // Whether the movement so far may still become a swipe-down-to-delete-word gesture:
+    // quick, mostly vertical and going down.
+    private boolean isPossibleSwipeDelete(final int x, final int y) {
+        if (System.currentTimeMillis() - mStartTime > SWIPE_DELETE_MAX_DURATION_MS) {
+            return false;
+        }
+        final int dx = Math.abs(x - mStartX);
+        final int dy = y - mStartY;
+        final int slop = getSwipeDeleteSlop();
+        return dy >= -slop && dx <= Math.max(dy / 2, slop);
+    }
+
+    // Whether the completed movement is a swipe-down-to-delete-word gesture.
+    private boolean isSwipeDelete(final int x, final int y) {
+        final int dx = Math.abs(x - mStartX);
+        final int dy = y - mStartY;
+        return System.currentTimeMillis() - mStartTime <= SWIPE_DELETE_MAX_DURATION_MS
+                && dy >= getSwipeDeleteMinDistance()
+                && dx * 2 < dy;
     }
 
     private void startKeySelectionByDraggingFinger(final Key key) {
@@ -1043,6 +1085,21 @@ public final class PointerTracker implements PointerTrackerQueue.Element,
             return;
         }
 
+        if (mSwipeDeleteStartKey != null) {
+            if (sInGesture || !isPossibleSwipeDelete(x, y)) {
+                mSwipeDeleteStartKey = null;
+            } else if (!sGestureEnabler.shouldHandleGesture()) {
+                // Stay on the start key instead of sliding to the keys below, the decision
+                // is taken on the up event
+                if (y - mStartY >= getSwipeDeleteMinDistance()) {
+                    sTimerProxy.cancelKeyTimersOf(this);
+                }
+                mLastX = x;
+                mLastY = y;
+                return;
+            }
+        }
+
         final Key newKey = onMoveKey(x, y);
         if(newKey != oldKey && mStartedOnFastLongPress) {
             onLongPressed();
@@ -1127,6 +1184,8 @@ public final class PointerTracker implements PointerTrackerQueue.Element,
 
         mStartedOnFastLongPress = false;
         sTimerProxy.cancelKeyTimersOf(this);
+        final Key swipeDeleteStartKey = mSwipeDeleteStartKey;
+        mSwipeDeleteStartKey = null;
         final boolean isInDraggingFinger = mIsInDraggingFinger;
         final boolean isInSlidingKeyInput = mIsInSlidingKeyInput;
         resetKeySelectionByDraggingFinger();
@@ -1186,6 +1245,14 @@ public final class PointerTracker implements PointerTrackerQueue.Element,
             return;
         }
         if (mIsTrackingForActionDisabled) {
+            return;
+        }
+        if (swipeDeleteStartKey != null && getActivePointerTrackerCount() == 1
+                && isSwipeDelete(x, y)) {
+            if (currentKey != null) {
+                callListenerOnRelease(currentKey, currentKey.getCode(), true /* withSliding */);
+            }
+            sListener.onSwipeDeleteWord();
             return;
         }
         if (currentKey != null && currentKey.isRepeatable()

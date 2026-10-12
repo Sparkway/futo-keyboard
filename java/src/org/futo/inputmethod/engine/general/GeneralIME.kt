@@ -732,6 +732,51 @@ class GeneralIME(val helper: IMEHelper) : IMEInterface, WordLearner, SuggestionS
         }
     }
 
+    override fun onSwipeDeleteWord() {
+        val connection = inputLogic.mConnection
+
+        // Existing selection: delete it, same as releasing swipe-on-backspace
+        if (connection.hasSelection()) {
+            onUpWithDeletePointerActive()
+            return
+        }
+
+        setNeutralSuggestionStrip()
+        if (connection.hasCursorPosition() && !settings.current.mInputAttributes.mIsCodeField) {
+            // Select one word towards the start of the text, regardless of the backspace setting,
+            // then delete the selection and offer it as an undo suggestion
+            if (settings.current.mIsRTL) {
+                inputLogic.cursorRight(1, true, true)
+            } else {
+                inputLogic.cursorLeft(1, true, true)
+            }
+            onUpWithDeletePointerActive()
+        } else {
+            // Unknown cursor position: delete the previous word character by character
+            val textBefore = connection.getTextBeforeCursor(64, 0)?.toString() ?: return
+            var end = textBefore.length
+            while (end > 0 && Character.isWhitespace(textBefore.codePointBefore(end))) {
+                end -= Character.charCount(textBefore.codePointBefore(end))
+            }
+            while (end > 0 && !Character.isWhitespace(textBefore.codePointBefore(end))) {
+                end -= Character.charCount(textBefore.codePointBefore(end))
+            }
+            var deletes = textBefore.codePointCount(end, textBefore.length)
+            while (deletes > 0) {
+                onEvent(
+                    Event.createSoftwareKeypressEvent(
+                        Event.NOT_A_CODE_POINT,
+                        Constants.CODE_DELETE,
+                        Constants.NOT_A_COORDINATE,
+                        Constants.NOT_A_COORDINATE,
+                        false
+                    )
+                )
+                deletes--
+            }
+        }
+    }
+
     override fun onUpWithPointerActive() {
         inputLogic.restartSuggestionsOnWordTouchedByCursor(
             settings.current, null,

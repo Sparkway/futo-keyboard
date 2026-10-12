@@ -1,5 +1,7 @@
 # FUTO Keyboard
 
+> **Modified version.** This is an unofficial, modified copy of FUTO Keyboard 0.1.30. It adds a "Swipe down to delete word" option (quick swipe down on a letter key deletes the previous word). It is not made or supported by FUTO. The original license is in [LICENSE.md](LICENSE.md).
+
 The goal is to make a good modern keyboard that stays offline and doesn't spy on you. This keyboard is a fork of [LatinIME, The Android Open-Source Keyboard](https://android.googlesource.com/platform/packages/inputmethods/LatinIME), with significant changes made to it.
 
 Check out the [FUTO Keyboard website](https://keyboard.futo.tech/) for downloads and more information.

@@ -1199,6 +1199,10 @@ class JapaneseIME(val helper: IMEHelper) : IMEInterface {
 
     }
 
+    override fun onSwipeDeleteWord() {
+
+    }
+
     override fun onUpWithPointerActive() {
 
     }
